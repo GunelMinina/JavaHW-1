@@ -1,85 +1,77 @@
-import java.util.Objects;
-import java.util.Scanner;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.util.logging.FileHandler;
+import java.util.logging.Level;
+import java.util.logging.Logger;
+import java.util.logging.SimpleFormatter;
 
 public class Main {
     public static void main(String[] args) {
-        ex4();
+
+        ex1();
     }
 
+    static void ex1() {
+        /*
+Дана json строка { { "фамилия":"Иванов","оценка":"5","предмет":"Математика"},
+{"фамилия":"Петрова","оценка":"4","предмет":"Информатика"},
+{"фамилия":"Краснов","оценка":"5","предмет":"Физика"}}
+Задача написать метод(ы), который распарсить строку
+и выдаст ответ вида:
+Студент Иванов получил 5 по предмету Математика.
+Студент Петрова получил 4 по предмету Информатика.
+Студент Краснов получил 5 по предмету Физика.
+Используйте StringBuilder для подготовки ответа
+ */
+        String s = "{[{\"фамилия\":\"Иванов\",\"оценка\":\"5\",\"предмет\":\"Математика\"}," +
+                "{\"фамилия\":\"Петрова\",\"оценка\":\"4\",\"предмет\":\"Информатика\"}," +
+                "{\"фамилия\":\"Краснов\",\"оценка\":\"5\",\"предмет\":\"Физика\"}]}";
 
-    static void ex1(){
-        //Вычислить n-ое треугольного число(сумма чисел от 1 до n)
 
-        System.out.println("Введите n");
-        Scanner scanner = new Scanner(System.in);
-        int n = scanner.nextInt();
-        int sum = 0;
-        for (int i = 1; i <= n; i++) {
-            sum += i;
+        StringBuilder stringBuilder = new StringBuilder();
+        String json = s.substring(4, s.length() - 4);
+        String[] students = json.split("},");
+        for (int i = 0; i < students.length ; i++) {
+            String[] data = students[i].split(",");
+            String[] data_name = data[0].split(":");
+            String[] data_mark = data[1].split(":");
+            String[] data_subj = data[2].split(":");
+            String name = data_name[1].replace("\"", "");
+            String mark = data_mark[1].replace("\"", "");
+            String subj = data_subj[1].replace("\"", "");
+            stringBuilder.append("Студент "+ name +" получил "+ mark +" по предмету "+ subj + "\n");
+
         }
-        System.out.print(sum);
+
+        String filePath = "result.txt";
+        writeToFile(stringBuilder.toString(), filePath);
+        System.out.println(stringBuilder);
     }
 
-    static void ex2(){
-        //Вычислить n! (произведение чисел от 1 до n)
+    static void writeToFile(String s, String filePath){
+        /*
+        Создать метод, который запишет результат работы в файл
+        Обработайте исключения и запишите ошибки в лог файл
+         */
 
-        System.out.println("Введите n");
-        Scanner scanner = new Scanner(System.in);
-        int n = scanner.nextInt();
-        int mult = 1;
-        for (int i = 1; i <= n; i++) {
-            mult = mult*i;
+        Logger logger = Logger.getAnonymousLogger();
+        logger.log(Level.INFO, "Все хорошо");
+        SimpleFormatter formatter = new SimpleFormatter();
+        FileHandler fileHandler = null;
+        try {
+            fileHandler = new FileHandler("log.txt");
+            fileHandler.setFormatter(formatter);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        System.out.print(mult);
-    }
+        logger.addHandler(fileHandler);
 
-       static void ex3() {
-        //Вывести все простые числа от 1 до 1000
-        // (простые числа - это числа которые делятся только на себя
-        // и на единицу без остатка. Чтобы найти остаток от деления используйте оператор % ,
-        // например 10%3 будет равно единице)
-
-        for (int i = 1; i <= 1000; i++) {
-            boolean prostoe = true;
-            for (int j = 2; j < i; j++) {
-                if (i % j == 0){
-                    prostoe = false;
-                }
-            }
-            if (prostoe){
-                System.out.println(i);
-            }
+        try (FileWriter fileWriter = new FileWriter(filePath, false)) {
+            fileWriter.write(s);
+        } catch (Exception e){
+            logger.log(Level.WARNING, e.getMessage());
+            e.printStackTrace();
         }
-
-    }
-
-    static void ex4(){
-        //Реализовать простой калькулятор
-        // ("введите первое число"... "Введите второе число"...
-        // "укажите операцию, которую надо выполнить с этими числами"... "ответ: ...")
-
-        System.out.println("Введите a");
-        Scanner scanner = new Scanner(System.in);
-        double a = scanner.nextDouble();
-        System.out.println("Введите b");
-        int b = scanner.nextInt();
-        System.out.println("Введите знак операции(+-*/)");
-
-        String znak = scanner.next();
-
-
-        if (Objects.equals(znak, "+")) {
-            System.out.printf("%f%s%d = %f", a, znak, b, a+b);
-        } else if (Objects.equals(znak, "-")) {
-            System.out.printf("%f%s%d = %f", a, znak, b, a-b);
-        } else if (Objects.equals(znak, "*")) {
-            System.out.printf("%f%s%d = %f", a, znak, b, a*b);
-        } else if (Objects.equals(znak, "/")) {
-            System.out.printf("%f%s%d = %f", a, znak, b, a/b);
-        } else {
-            System.out.println("Неизвестная операция");
-        }
-
     }
 
 }
